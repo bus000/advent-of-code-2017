@@ -30,3 +30,10 @@ executable day3
   hs-source-dirs:      day_3
   GHC-Options:         -Wall
   default-language:    Haskell2010
+
+executable day4
+  main-is:             Main.hs
+  build-depends:       base >=4.8 && <4.9
+  hs-source-dirs:      day_4
+  GHC-Options:         -Wall
+  default-language:    Haskell2010
