@@ -12,6 +12,7 @@ main = do
     (first, rest) <- T.splitAt 1 . T.init <$> T.getContents
 
     let input = first <> rest <> first
+        toSum :: [Int]
         toSum
             = map read
             . map (:[])

@@ -9,7 +9,7 @@ data Direction = Up | Down | Left | Right
 
 main :: IO ()
 main = do
-    n <- read . init <$> getContents :: IO Int
+    n <- read . init <$> getContents
 
     let (x, y) = toEuclidean n
 
