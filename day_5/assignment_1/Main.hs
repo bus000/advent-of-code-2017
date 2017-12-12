@@ -8,7 +8,6 @@ import Data.Maybe (isNothing)
 
 type Position = Int
 type Jump = Int
-type Finished = Bool
 
 data CPU = CPU (Map.Map Position Jump) Position deriving Show
 

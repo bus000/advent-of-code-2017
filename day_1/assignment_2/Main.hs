@@ -1,6 +1,5 @@
 module Main (main) where
 
-import Data.List (group)
 import Control.Arrow ((&&&))
 import qualified Data.Char as C
 

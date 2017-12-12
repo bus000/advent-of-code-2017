@@ -9,4 +9,4 @@ main = do
     print $ sum (toSum $ [first] ++ rest ++ [first])
 
 toSum :: String -> [Int]
-toSum = map read . map (:[]) . concatMap (drop 1) . group
+toSum = map (read . (:[])) . concatMap (drop 1) . group

@@ -3,7 +3,7 @@ module Main (main) where
 import qualified Control.Monad.State as S
 import qualified Data.Set as Set
 import qualified Data.Vector as V
-import Data.Vector ((!), (//))
+import Data.Vector ((!))
 import Control.Arrow ((&&&))
 import Data.List (group, sort)
 import qualified Control.Monad.Loops as C
@@ -15,6 +15,7 @@ type Memory = (V.Vector Amount)
 
 data ComputerState = ComputerState Position Memory (Set.Set Memory)
 
+main :: IO ()
 main = do
     memory <- V.fromList . map read . words <$> getContents
 
@@ -50,7 +51,7 @@ distribute = S.modify $ \(ComputerState pos mem prevmem) ->
     in ComputerState (last positions) newmem prevmem
 
 findMax :: S.State ComputerState ()
-findMax = S.modify $ \(ComputerState pos mem prevmem) ->
+findMax = S.modify $ \(ComputerState _ mem prevmem) ->
     ComputerState (V.maxIndex mem) mem prevmem
 
 followingIndices :: Memory -> Position -> [Position]
