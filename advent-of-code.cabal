@@ -99,7 +99,6 @@ executable day6_2
   main-is:             Main.hs
   build-depends:       base >=4.8 && <4.9,
                        mtl >=2.2.1,
-                       containers >=0.5.6.2,
                        monad-loops >=0.4.3,
                        vector >=0.12.0.1
   hs-source-dirs:      day_6/assignment_2

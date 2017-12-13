@@ -23,7 +23,7 @@ spiralSpace = map fst space
         let current = sum (map prevspace (surrounding pos))
         in (current, \x -> if x == pos then current else prevspace x)
 
-    initialSpace = (\x -> if x == (0, 0) then 1 else 0)
+    initialSpace x = if x == (0, 0) then 1 else 0
 
     surrounding (x, y) =
         [ (x-1, y+1), (x, y+1), (x+1, y+1)
