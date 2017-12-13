@@ -104,3 +104,12 @@ executable day6_2
   hs-source-dirs:      day_6/assignment_2
   GHC-Options:         -Wall
   default-language:    Haskell2010
+
+executable day7_1
+  main-is:             Main.hs
+  build-depends:       base >=4.8 && <4.9,
+                       parsec >=3.0,
+                       parsec3-numbers >=0.1.0
+  hs-source-dirs:      day_7/assignment_1
+  GHC-Options:         -Wall
+  default-language:    Haskell2010
