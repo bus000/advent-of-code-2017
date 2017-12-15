@@ -33,10 +33,13 @@ main = do
 
     case input of
         Left err -> S.die (show err)
-        Right program -> print $ maxMap (evaluate program Map.empty)
+        Right program ->
+            let states = evaluate program Map.empty
+                nonEmpty = filter (not . Map.null) states
+            in print $ maximum (map maxMap nonEmpty)
 
-evaluate :: Program -> Registers -> Registers
-evaluate program regs = foldl evaluateStm regs program
+evaluate :: Program -> Registers -> [Registers]
+evaluate program regs = scanl evaluateStm regs program
 
 evaluateStm :: Registers -> Stm -> Registers
 evaluateStm regs (Dec var amount cond)
