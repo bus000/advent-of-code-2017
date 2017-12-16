@@ -1,10 +1,12 @@
 module Main (main) where
 
-import Data.List ((\\), find, nub)
+import Data.List ((\\), find, nub, sortOn)
+import Data.List.Extra (groupOn)
 import qualified Text.Parsec as P
 import qualified Text.Parsec.Number as P
 import qualified Control.Monad as C
 import Data.Monoid (Sum(..), getSum)
+import Control.Arrow ((&&&))
 
 data Tree a = Tree a [Tree a] deriving (Show)
 
@@ -25,15 +27,17 @@ main = do
 
     let [rootName] = allPrograms programs \\ allChildren programs
         Just root = find ((==) rootName . getName) programs
-        tree = Sum <$> buildTree programs root
-        treeS = getSum <$> treeSum tree
-        Just (Tree value branches) = findInbalance treeS
+        tree = buildTree programs root
+        weights = fmap getSum (treeSum $ Sum . getWeight <$> tree)
+        Just (Tree _ branches) = findInbalance $ combine tree weights
+        ts = map (((getWeight . fst) &&& snd) . getTreeValue) branches
+        [(a,b), (_,d)] = map head . sortOn length . groupOn snd . sortOn snd $ ts
 
-    print (value, map getTreeValue branches)
+    print $ a - (abs $ b - d)
 
-buildTree :: [Program] -> Program -> Tree Weight
-buildTree programs root@(Program _ weight children) =
-    Tree weight (map (buildTree programs) childPrograms)
+buildTree :: [Program] -> Program -> Tree Program
+buildTree programs root@(Program _ _ children) =
+    Tree root (map (buildTree programs) childPrograms)
   where
     childPrograms = filter (\x -> getName x `elem` children) programs
 
@@ -43,15 +47,20 @@ treeSum (Tree value branches) = Tree (mconcat $ value:newValues) newBranches
     newBranches = map treeSum branches
     newValues = map getTreeValue newBranches
 
-findInbalance :: Ord a => Tree a -> Maybe (Tree a)
-findInbalance tree@(Tree value branches)
+findInbalance :: Tree (Program, Weight) -> Maybe (Tree (Program, Weight))
+findInbalance tree@(Tree (_, _) branches)
     | not (isBalanced tree) && all isBalanced branches = Just tree
     | otherwise = C.msum $ map findInbalance branches
 
-isBalanced :: Ord a => Tree a -> Bool
+combine :: Tree a -> Tree b -> Tree (a, b)
+combine (Tree a as) (Tree b bs) = Tree (a, b) newBranches
+  where
+    newBranches = map (uncurry combine) $ zip as bs
+
+isBalanced :: Tree (Program, Weight) -> Bool
 isBalanced (Tree _ branches) = length unique <= 1
   where
-    unique = nub $ map getTreeValue branches
+    unique = nub $ map (snd . getTreeValue) branches
 
 allChildren :: [Program] -> [Name]
 allChildren = concatMap getChildren
@@ -77,6 +86,9 @@ getChildren (Program _ _ children) = children
 
 getName :: Program -> Name
 getName (Program name _ _) = name
+
+getWeight :: Program -> Weight
+getWeight (Program _ weight _) = weight
 
 getTreeValue :: Tree a -> a
 getTreeValue (Tree x _) = x
