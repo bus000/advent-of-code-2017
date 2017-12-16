@@ -4,7 +4,6 @@ import qualified Data.Map as Map
 import qualified Text.Parsec as P
 import qualified Text.Parsec.Number as P
 import qualified System.Exit as S
-import qualified Data.Either as E
 
 type Var = String
 type Amount = Int
@@ -71,16 +70,18 @@ statement :: ProgramParser Stm
 statement = P.choice (map P.try [dec, inc])
 
 dec :: ProgramParser Stm
-dec = Dec <$> variable <* P.string " dec " <*> P.int <* P.string " if " <*> cond
+dec = Dec <$> variable <* P.string " dec " <*> P.int <* P.string " if " <*>
+    condition
 
 inc :: ProgramParser Stm
-inc = Inc <$> variable <* P.string " inc " <*> P.int <* P.string " if " <*> cond
+inc = Inc <$> variable <* P.string " inc " <*> P.int <* P.string " if " <*>
+    condition
 
 variable :: ProgramParser Var
 variable = P.many (P.oneOf ['a'..'z'])
 
-cond :: ProgramParser Cond
-cond = P.choice (map P.try [lt, gt, eq, neq, leq, geq])
+condition :: ProgramParser Cond
+condition = P.choice (map P.try [lt, gt, eq, neq, leq, geq])
   where
     lt = Lt <$> variable <* P.string " < " <*> P.int
     gt = Gt <$> variable <* P.string " > " <*> P.int
