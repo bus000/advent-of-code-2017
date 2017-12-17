@@ -20,7 +20,7 @@ main = do
     let KnotHashState vec _ _ = knotHash 256 input 64
         dense = map (foldr1 Bits.xor) . L.chunksOf 16 . V.toList $ vec
 
-    C.forM dense $ printf "%02x"
+    C.forM_ dense $ printf "%02x"
     putStrLn ""
 
 knotHash :: Int -> [Int] -> Int -> KnotHashState
