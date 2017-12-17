@@ -33,7 +33,7 @@ main = do
         ts = map (((getWeight . fst) &&& snd) . getTreeValue) branches
         [(a,b), (_,d)] = map head . sortOn length . groupOn snd . sortOn snd $ ts
 
-    print $ a - (abs $ b - d)
+    print $ a - abs (b - d)
 
 buildTree :: [Program] -> Program -> Tree Program
 buildTree programs root@(Program _ _ children) =
@@ -55,7 +55,7 @@ findInbalance tree@(Tree (_, _) branches)
 combine :: Tree a -> Tree b -> Tree (a, b)
 combine (Tree a as) (Tree b bs) = Tree (a, b) newBranches
   where
-    newBranches = map (uncurry combine) $ zip as bs
+    newBranches = zipWith combine as bs
 
 isBalanced :: Tree (Program, Weight) -> Bool
 isBalanced (Tree _ branches) = length unique <= 1

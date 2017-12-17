@@ -2,7 +2,6 @@ module Main (main) where
 
 import qualified Text.Parsec as P
 import qualified System.Exit as S
-import qualified Data.Either as E
 
 data Group = Group [Either Garbage Group] deriving (Show)
 data Garbage = Garbage String deriving (Show)
@@ -13,17 +12,16 @@ main = do
 
     case input of
         Left err -> S.die $ show err
-        Right group ->
-            print (length $ concatMap garbageString (getGarbage group))
+        Right g -> print (length $ concatMap garbageString (getGarbage g))
 
 getGarbage :: Group -> [Garbage]
 getGarbage (Group xs) = concatMap getGarbage' xs
   where
-    getGarbage' (Right group) = getGarbage group
-    getGarbage' (Left garbage) = [garbage]
+    getGarbage' (Right g) = getGarbage g
+    getGarbage' (Left g) = [g]
 
 garbageString :: Garbage -> String
-garbageString (Garbage garbage) = garbage
+garbageString (Garbage g) = g
 
 parseInput :: String -> Either P.ParseError Group
 parseInput = P.parse (group <* P.eof) ""
