@@ -21,8 +21,8 @@ main = do
 knotHash :: Int -> [Int] -> KnotHashState
 knotHash size reverses = S.execState (C.mapM reverseNext reverses) initialState
   where
-    vec = V.fromList $ [0..size-1]
-    positions = cycle $ [0..size-1]
+    vec = V.fromList [0..size-1]
+    positions = cycle [0..size-1]
     initialState = KnotHashState vec positions 0
 
 type KnotHash a = S.State KnotHashState a

@@ -17,7 +17,7 @@ main = do
     print $ maximum distances
 
 allPos :: Position -> [Direction] -> [Position]
-allPos start = scanl move start
+allPos = scanl move
   where
     move (x, y) N = (x + 1, y + 0)
     move (x, y) NE = (x + 1, y - 1)

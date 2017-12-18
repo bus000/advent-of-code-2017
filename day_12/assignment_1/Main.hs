@@ -1,7 +1,7 @@
 module Main (main) where
 
 import qualified Data.Map as Map
-import qualified Data.Set as Set
+import qualified Data.Set.Monad as Set
 import qualified Text.Parsec as P
 import qualified Text.Parsec.Number as P
 import qualified System.Exit as Sys
@@ -26,10 +26,10 @@ parseInput = P.parse (pipes <* P.eof) ""
 type InputParser a = P.Parsec String () a
 
 pipes :: InputParser [Pipes]
-pipes = pipe `P.endBy` (P.char '\n')
+pipes = pipe `P.endBy` P.char '\n'
 
 pipe :: InputParser Pipes
-pipe = (,) <$> P.int <* P.string " <-> " <*> P.int `P.sepBy1` (P.string ", ")
+pipe = (,) <$> P.int <* P.string " <-> " <*> P.int `P.sepBy1` P.string ", "
 
 {- Graph specific types and functions. -}
 
@@ -42,36 +42,33 @@ emptyGraph = Graph Map.empty
 fromList :: Ord a => [(a, b, [a])] -> Graph a b
 fromList = foldr consGraph emptyGraph
   where
-    consGraph (key, value, neighbours) (Graph g) =
-        Graph $ Map.insert key (Node value neighbours) g
+    consGraph (key, value, ns) (Graph g) =
+        Graph $ Map.insert key (Node value ns) g
 
 fromListEmpty :: Ord a => [(a, [a])] -> Graph a ()
 fromListEmpty = fromList . map (\(x, y) -> (x, (), y))
 
 reachable :: Ord a => Graph a b -> a -> Set.Set a
 reachable graph a =
-    fst $ S.execState (visitFirst `C.untilM_` toVisitEmpty) initialState
+    fst $ S.execState (visit `C.untilM_` toVisitEmpty) initialState
   where
     initialState = (Set.empty, Set.singleton a)
 
-    visitFirst = do
+    visit = do
         (visited, toVisit) <- S.get
-        case Set.maxView toVisit of
-            Just (v, vs) ->
-                let ns = neighbours graph v
-                    unseen = filter (`Set.notMember` visited) ns
-                    toVisit' = Set.union vs (Set.fromList unseen)
-                in S.put (Set.insert v visited, toVisit')
-            Nothing -> S.put (visited, toVisit)
+        let allNeighbours = toVisit >>= neighbours graph
+            toVisit' = Set.filter (`Set.notMember` visited) allNeighbours
+            visited' = Set.union visited toVisit
+        S.put (visited', toVisit')
 
     toVisitEmpty = do
         (_, toVisit) <- S.get
         return $ Set.null toVisit
 
-neighbours :: Ord a => Graph a b -> a -> [a]
+neighbours :: Ord a => Graph a b -> a -> Set.Set a
 neighbours graph a = case graphLookup graph a of
-    Just (Node _ ns) -> ns
-    Nothing -> []
+    Just (Node _ ns) -> Set.fromList ns
+    Nothing -> Set.empty
 
 graphLookup :: Ord a => Graph a b -> a -> Maybe (Node a b)
 graphLookup (Graph g) a = Map.lookup a g

@@ -27,8 +27,8 @@ knotHash :: Int -> [Int] -> Int -> KnotHashState
 knotHash size reverses times =
     S.execState (C.replicateM times knotHash') initialState
   where
-    vec = V.fromList $ [0..size-1]
-    positions = cycle $ [0..size-1]
+    vec = V.fromList [0..size-1]
+    positions = cycle [0..size-1]
     initialState = KnotHashState vec positions 0
     knotHash' = C.mapM reverseNext reverses
 

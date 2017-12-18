@@ -14,7 +14,7 @@ main = do
     print $ distance (0, 0) (endPos (0, 0) input)
 
 endPos :: Position -> [Direction] -> Position
-endPos start = foldr move start
+endPos = foldr move
   where
     move N (x, y) = (x + 1, y)
     move NE (x, y) = (x, y + 1)
