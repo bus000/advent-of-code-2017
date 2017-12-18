@@ -18,7 +18,7 @@ main = do
         Left err -> Sys.die $ show err
         Right lgraph -> do
             let initialGraph = fromListEmpty lgraph
-            print $ Set.size (reachable initialGraph 0)
+            print $ length (connectedComponentRoots initialGraph)
 
 parseInput :: String -> Either P.ParseError [Pipes]
 parseInput = P.parse (pipes <* P.eof) ""
@@ -65,6 +65,14 @@ reachable graph a =
         (_, toVisit) <- S.get
         return $ Set.null toVisit
 
+connectedComponentRoots :: Ord a => Graph a b -> [a]
+connectedComponentRoots graph =
+    snd $ foldr connectedComponent (Set.empty, []) (graphKeys graph)
+  where
+    connectedComponent a (visited, roots)
+        | a `Set.member` visited = (visited, roots)
+        | otherwise = (Set.union visited (reachable graph a), a:roots)
+
 neighbours :: Ord a => Graph a b -> a -> Set.Set a
 neighbours graph a = case graphLookup graph a of
     Just (Node _ ns) -> Set.fromList ns
@@ -72,3 +80,6 @@ neighbours graph a = case graphLookup graph a of
 
 graphLookup :: Ord a => Graph a b -> a -> Maybe (Node a b)
 graphLookup (Graph g) a = Map.lookup a g
+
+graphKeys :: Graph a b -> [a]
+graphKeys (Graph g) = Map.keys g
