@@ -3,7 +3,6 @@ module Main (main) where
 import qualified Data.List as L
 import qualified Data.Map.Strict as Map
 import qualified Data.Vector as V
-import qualified Debug.Trace as Debug
 import qualified System.Exit as Sys
 import qualified Text.Parsec as P
 import qualified Text.Parsec.Number as P
@@ -28,13 +27,18 @@ dances line moves n = iterate (`dance` moves) dup !! (n - bb)
     ab = (n `div` (id2 - id1)) * (id2 - id1) + id1
     bb = head . dropWhile (> n) $ [ab,ab-(id2 - id1)..]
     [id1, id2] = take 2 . L.elemIndices dup $ positions
+
     dup = fst . Map.findMax . head . dropWhile onlyUnique .
         scanl count Map.empty $ positions
+
     positions = iterate (`dance` moves) line
+
+    onlyUnique :: Map.Map (Lineup a) Int -> Bool
     onlyUnique m
         | Map.null m = True
         | otherwise = case Map.findMax m of
             (_, v) -> v < 2
+
     count m l = Map.insertWith (+) l 1 m
 
 dance :: Eq a => Lineup a -> [Move a] -> Lineup a

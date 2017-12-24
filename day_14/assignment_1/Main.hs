@@ -6,7 +6,7 @@ main :: IO ()
 main = do
     input <- init <$> getContents
 
-    let strings = map (\x -> input ++ "-" ++ show x) [0..127]
+    let strings = map (\x -> input ++ "-" ++ show x) ([0..127] :: [Int])
         hash = concatMap KH.knothash strings
         bits = concatMap hexVal hash
 

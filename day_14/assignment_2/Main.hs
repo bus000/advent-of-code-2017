@@ -2,14 +2,13 @@ module Main (main) where
 
 import qualified KnotHash as KH
 import qualified Data.Array as A
-import qualified Data.Map.Strict as Map
 import qualified Graph as G
 
 main :: IO ()
 main = do
     input <- init <$> getContents
 
-    let strings = map (\x -> input ++ "-" ++ show x) [0..127]
+    let strings = map (\x -> input ++ "-" ++ show x) ([0..127] :: [Int])
         hash = concatMap KH.knothash strings
         bits = concatMap hexVal hash
         arr = A.listArray ((0,0), (127, 127)) bits

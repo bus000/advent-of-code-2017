@@ -20,7 +20,7 @@ main = do
     initLine = V.fromList ['a'..'p']
 
 dance :: Eq a => Lineup a -> [Move a] -> Lineup a
-dance initLine = foldl move initLine
+dance = foldl move
   where
     move line (Spin n) = spin line n
     move line (Exchange n1 n2) = exchange line n1 n2
