@@ -20,10 +20,10 @@ type ShiftSize = Int
 data Spinlock a = Spinlock (Seq.Seq a) Position ShiftSize deriving (Show)
 
 insertAll :: Show a => Spinlock a -> [a] -> Spinlock a
-insertAll lock = foldl insert lock
+insertAll = foldl insert
 
 insert :: Spinlock a -> a -> Spinlock a
-insert lock x = addValue (move lock) x
+insert lock = addValue (move lock)
 
 move :: Spinlock a -> Spinlock a
 move (Spinlock lock pos shift) = Spinlock lock pos' shift
