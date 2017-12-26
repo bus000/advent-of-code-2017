@@ -126,7 +126,7 @@ getValue (RegisterValue register) = do
     return $ Map.findWithDefault 0 register env
 
 ifValue :: Value -> Interpreter Bool
-ifValue (Literal n) = return $ n /= 0
+ifValue (Literal n) = return $ n > 0
 ifValue register = (> 0) <$> getValue register
 
 {- Declare and parse statements. -}
