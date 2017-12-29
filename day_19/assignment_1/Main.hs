@@ -19,9 +19,10 @@ main = do
     putStrLn $ snd $ RWS.evalRWS move tubeMap (startPos, Down, True)
 
 type Position = (Int, Int)
+type TubeMap = A.Array Position Char
 type Turning = Bool
 data Direction = Up | Down | Left | Right deriving (Show, Eq, Enum)
-type Tube a = RWS.RWS (A.Array Position Char) [Char] (Position, Direction, Turning) a
+type Tube a = RWS.RWS TubeMap [Char] (Position, Direction, Turning) a
 data Action = Turn | Continue | Abort | ReportContinue Char
 
 move :: Tube ()
