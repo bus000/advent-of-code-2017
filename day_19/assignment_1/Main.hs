@@ -5,7 +5,6 @@ import qualified Control.Monad.RWS.Lazy as RWS
 import Prelude hiding (Either(..))
 import qualified Data.Array as A
 import qualified Data.Char as Char
-import qualified Debug.Trace as Debug
 
 main :: IO ()
 main = do
@@ -23,49 +22,65 @@ type Position = (Int, Int)
 type Turning = Bool
 data Direction = Up | Down | Left | Right deriving (Show, Eq, Enum)
 type Tube a = RWS.RWS (A.Array Position Char) [Char] (Position, Direction, Turning) a
+data Action = Turn | Continue | Abort | ReportContinue Char
 
 move :: Tube ()
 move = do
     tubeMap <- RWS.ask
     (position, direction, turning) <- RWS.get
 
-    let position' = movePos position direction
+    case nextAction tubeMap position direction turning of
+        Abort -> return ()
+        Turn -> turn
+        Continue -> forward >> move
+        ReportContinue c -> RWS.tell [c] >> forward >> move
+  where
+    nextAction tubeMap pos dir False = case tubeMap A.! pos of
+        c | c == '|' || c == '-' -> Continue
+        c | Char.isAlpha c -> ReportContinue c
+        c | c == '+' -> Turn
+        _ -> Abort
 
-    case (direction, turning, tubeMap A.! position') of
-        (_, False, c)
-            | c == '|' || c == '-' -> continue position' direction
-            | Char.isAlpha c -> RWS.tell [c] >> continue position' direction
-            | c == '+' -> turn position' direction
+    nextAction tubeMap pos dir True
+        | dir == Up || dir == Down = case tubeMap A.! pos of
+            c | c == '|' -> Continue
+            c | Char.isAlpha c -> ReportContinue c
+            _ -> Abort
+        | dir == Left || dir == Right = case tubeMap A.! pos of
+            c | c == '-' -> Continue
+            c | Char.isAlpha c -> ReportContinue c
+            _ -> Abort
 
-        (Up, True, '|') -> continue position' direction
-        (Down, True, '|') -> continue position' direction
-        (Left, True, '-') -> continue position' direction
-        (Right, True, '-') -> continue position' direction
-        (_, True, c)
-            | Char.isAlpha c -> RWS.tell [c] >> continue position' direction
+turn :: Tube ()
+turn = do
+    (position, direction, _) <- RWS.get
 
-        _ -> return ()
+    let directions' = orthogonal direction
+        positions' = map (movePos position) directions'
+        posdirs = zip positions' directions'
+
+    C.mapM_ (\(pos, dir) -> RWS.put (pos, dir, True) >> move) posdirs
   where
     movePos (x, y) Up    = (x - 1, y)
     movePos (x, y) Down  = (x + 1, y)
     movePos (x, y) Left  = (x, y - 1)
     movePos (x, y) Right = (x, y + 1)
 
-    continue newPosition direction = do
-        RWS.put (newPosition, direction, False)
-        move
+    orthogonal Up = [Left, Right]
+    orthogonal Down = [Left, Right]
+    orthogonal Left = [Up, Down]
+    orthogonal Right = [Up, Down]
 
-turn :: Position -> Direction -> Tube ()
-turn newPosition curDir =
-    C.mapM_ (\dir -> RWS.put (newPosition, dir, True) >> move) directions
+forward :: Tube ()
+forward = do
+    (position, direction, _) <- RWS.get
+    let position' = movePos position direction
+    RWS.put (position', direction, False)
   where
-    directions = filter (`notElem` [curDir, opposite curDir]) allDirections
-    allDirections = enumFrom . toEnum $ 0
-
-    opposite Up = Down
-    opposite Down = Up
-    opposite Left = Right
-    opposite Right = Left
+    movePos (x, y) Up    = (x - 1, y)
+    movePos (x, y) Down  = (x + 1, y)
+    movePos (x, y) Left  = (x, y - 1)
+    movePos (x, y) Right = (x, y + 1)
 
 findStartPosition :: A.Array Position Char -> Position
 findStartPosition = fst . head . filter (not . Char.isSpace . snd) . A.assocs
