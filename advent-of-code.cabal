@@ -337,3 +337,13 @@ executable day18_2
   hs-source-dirs:      day_18/assignment_2
   GHC-Options:         -Wall
   default-language:    Haskell2010
+
+executable day19_1
+  main-is:             Main.hs
+  build-depends:       base >=4.8 && <4.9,
+                       array >=0.5.1.0,
+                       mtl >=2.2.1,
+                       transformers >=0.4.2.0
+  hs-source-dirs:      day_19/assignment_1
+  GHC-Options:         -Wall
+  default-language:    Haskell2010
