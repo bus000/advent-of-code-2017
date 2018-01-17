@@ -376,3 +376,15 @@ executable day20_2
   hs-source-dirs:      day_20/assignment_2
   GHC-Options:         -Wall
   default-language:    Haskell2010
+
+executable day21_1
+  main-is:             Main.hs
+  build-depends:       base >=4.8 && <4.9,
+                       classy-prelude >=1.3.1,
+                       parsec >=3.0,
+                       repa >=3.4.1.3,
+                       repa-algorithms >=3.4.0.2,
+                       split >=0.2.3.2
+  hs-source-dirs:      day_21/assignment_1
+  GHC-Options:         -Wall
+  default-language:    Haskell2010
