@@ -18,8 +18,8 @@ main :: IO ()
 main = do
     rules <- parseInput <$> getContents >>= either (Sys.die . show) return
 
-    expandedRules <- expandRules rules
-    let art = createArt 5 expandedRules startArray
+    let expandedRules = expandRules rules
+        art = createArt 5 expandedRules startArray
 
     print =<< R.sumAllP (R.map (B.bool (0::Int) (1::Int)) art)
   where
@@ -84,30 +84,21 @@ data Rule e = Rule
   deriving Show
 
 {- | Expand all rules with their rotated counterparts. -}
-expandRules :: (Monad m, R.Unbox e) => [Rule e] -> m [Rule e]
-expandRules rules = concat <$> mapM expandRule rules
+expandRules :: R.Unbox e => [Rule e] -> [Rule e]
+expandRules = concatMap expandRule
 
 {- | Expand a single rule to its rotated counterparts. -}
-expandRule :: (Monad m, R.Unbox e) => Rule e -> m [Rule e]
-expandRule (Rule arr0 e) = do
-    arr1 <- R.computeP $ rotate arr0
-    arr2 <- R.computeP $ rotate arr1
-    arr3 <- R.computeP $ rotate arr2
-    arr4 <- R.computeP $ flipVertical arr0
-    arr5 <- R.computeP $ flipVertical arr1
-    arr6 <- R.computeP $ flipVertical arr2
-    arr7 <- R.computeP $ flipVertical arr3
-
-    return
-        [ Rule arr0 e
-        , Rule arr1 e
-        , Rule arr2 e
-        , Rule arr3 e
-        , Rule arr4 e
-        , Rule arr5 e
-        , Rule arr6 e
-        , Rule arr7 e
-        ]
+expandRule :: R.Unbox e => Rule e -> [Rule e]
+expandRule (Rule before0 after) = map (flip Rule $ after)
+    [before0, before1, before2, before3, before4, before5, before6, before7]
+  where
+    before1 = R.computeS $ rotate before0
+    before2 = R.computeS $ rotate before1
+    before3 = R.computeS $ rotate before2
+    before4 = R.computeS $ flipVertical before0
+    before5 = R.computeS $ flipVertical before1
+    before6 = R.computeS $ flipVertical before2
+    before7 = R.computeS $ flipVertical before3
 
 {- | Apply the first matching rule in the list of rules. -}
 applyRules :: (Eq e, R.Source r1 e, R.Unbox e) => [Rule e]
