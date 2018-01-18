@@ -16,18 +16,13 @@ import qualified Text.Parsec as P
 
 main :: IO ()
 main = do
-    input <- parseInput <$> getContents
+    rules <- parseInput <$> getContents >>= either (Sys.die . show) return
 
-    case input of
-        Left err -> Sys.die $ show err
-        Right rules -> do
-            expandedRules <- expandRules rules
+    expandedRules <- expandRules rules
+    art <- R.computeP $ createArt 5 expandedRules startArray ::
+        IO (R.Array R.U R.DIM2 Bool)
 
-            art <- R.computeP $ createArt 5 expandedRules startArray ::
-                IO (R.Array R.U R.DIM2 Bool)
-
-            trueVals <- R.sumAllP $ R.map (B.bool (0::Int) (1::Int)) art
-            print trueVals
+    print =<< R.sumAllP (R.map (B.bool (0::Int) (1::Int)) art)
   where
     startArray = R.fromListUnboxed (R.Z :. (3::Int) :. (3::Int))
         [ False, True , False
