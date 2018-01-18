@@ -7,6 +7,7 @@ import qualified Data.Array.Repa as R
 import Data.Array.Repa ((:.)(..))
 import qualified Data.Array.Repa.Algorithms.Matrix as R
 import qualified Data.Array.Repa.Repr.Unboxed as R
+import qualified Data.Bool as B
 import qualified Data.List as L
 import qualified Data.List.Split as L
 import Prelude ()
@@ -25,7 +26,7 @@ main = do
             art <- R.computeP $ createArt 5 expandedRules startArray ::
                 IO (R.Array R.U R.DIM2 Bool)
 
-            trueVals <- R.sumAllP $ R.map fromBool art
+            trueVals <- R.sumAllP $ R.map (B.bool (0::Int) (1::Int)) art
             print trueVals
   where
     startArray = R.fromListUnboxed (R.Z :. (3::Int) :. (3::Int))
@@ -33,10 +34,6 @@ main = do
         , False, False, True
         , True , True , True
         ]
-
-    fromBool :: Bool -> Int
-    fromBool False = 0
-    fromBool True = 1
 
 {- | Continuously replace subarrays of size 2x2 or 3x3 with arrays from the
  - list of rules. Runs the number of steps given. -}
