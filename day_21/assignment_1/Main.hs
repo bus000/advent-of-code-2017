@@ -60,7 +60,7 @@ split arr = L.chunksOf sideLen $
 
     sideLen = xSize `div` splitSize
 
-    extractSize = ((R.Z :. splitSize) :. splitSize)
+    extractSize = (R.Z :. splitSize) :. splitSize
 
 {- | Replace all arrays with replacements from the rules. -}
 replace :: (Eq e, Unbox e) => [Rule e]
@@ -68,11 +68,11 @@ replace :: (Eq e, Unbox e) => [Rule e]
     -> [[R.Array R.D R.DIM2 e]]
     -- ^ Arrays to replace.
     -> [[R.Array R.D R.DIM2 e]]
-replace rules arrays = map (map (applyRules rules)) arrays
+replace rules = map (map (applyRules rules))
 
 {- | Horizontal and vertical stack of the lists to a single array. -}
 collect :: [[R.Array R.D R.DIM2 e]] -> R.Array R.D R.DIM2 e
-collect arrays = R.transpose $ vstacked
+collect arrays = R.transpose vstacked
   where
     vstacked = L.foldl1 R.append . map R.transpose $ hstacked
     hstacked = map (L.foldl1 R.append) arrays
@@ -89,7 +89,7 @@ expandRules = concatMap expandRule
 
 {- | Expand a single rule to its rotated counterparts. -}
 expandRule :: R.Unbox e => Rule e -> [Rule e]
-expandRule (Rule before0 after) = map (flip Rule $ after)
+expandRule (Rule before0 after) = map (`Rule` after)
     [before0, before1, before2, before3, before4, before5, before6, before7]
   where
     before1 = R.computeS $ rotate before0
@@ -108,7 +108,7 @@ applyRules :: (Eq e, R.Source r1 e, R.Unbox e) => [Rule e]
     -> R.Array R.D R.DIM2 e
 applyRules rules arr = case L.find (R.equalsS arr . _before) rules of
     Just (Rule _ after) -> R.delay after
-    Nothing -> error $ "No rule found\n"
+    Nothing -> error "No rule found\n"
 
 {- | Rotate an array 90 degrees to the right. -}
 rotate :: R.Source r1 e => R.Array r1 R.DIM2 e -> R.Array R.D R.DIM2 e
@@ -117,7 +117,7 @@ rotate arr = if xSize /= ySize
     else arr'
   where
     ((R.Z :. xSize) :. ySize) = R.extent arr
-    arr' = R.fromFunction (R.Z :. xSize :. ySize) $
+    arr' = R.fromFunction (R.Z :. xSize :. ySize)
         (\(R.Z :. ix :. iy) -> arr R.! (R.Z :. xSize - iy - 1 :. ix))
 
 flipVertical :: R.Source r e => R.Array r R.DIM2 e -> R.Array R.D R.DIM2 e
@@ -132,9 +132,9 @@ parseInput = P.parse (ruleP `P.endBy` P.char '\n' <* P.eof) ""
 
 ruleP :: P.Parsec LText () (Rule Bool)
 ruleP = do
-    before <- concat <$> (P.many value) `P.sepBy` P.char '/'
+    before <- concat <$> P.many value `P.sepBy` P.char '/'
     P.string " => "
-    after <- concat <$> (P.many value) `P.sepBy` P.char '/'
+    after <- concat <$> P.many value `P.sepBy` P.char '/'
 
     let blen = round . sqrt . fromIntegral $ length before
         alen = round . sqrt . fromIntegral $ length after
