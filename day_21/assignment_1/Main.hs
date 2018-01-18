@@ -19,8 +19,7 @@ main = do
     rules <- parseInput <$> getContents >>= either (Sys.die . show) return
 
     expandedRules <- expandRules rules
-    art <- R.computeP $ createArt 5 expandedRules startArray ::
-        IO (R.Array R.U R.DIM2 Bool)
+    let art = createArt 5 expandedRules startArray
 
     print =<< R.sumAllP (R.map (B.bool (0::Int) (1::Int)) art)
   where
