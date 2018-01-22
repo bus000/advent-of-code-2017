@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE LambdaCase       #-}
 module Main (main) where
 
 import ClassyPrelude
@@ -32,36 +33,24 @@ bursts infected n = C.foldM (\inf _ -> burst inf) infected [1..n]
 burst :: (C.MonadRWS () (C.Sum Int) (Position, Direction) m) => Infected
     -- ^ Original infected nodes.
     -> m Infected
-burst infected = do
-    (position, direction) <- C.get
-
-    -- TODO: Rewrite with case.
-    let isInfected = position `member` infected
-        direction' = bool (left direction) (right direction) isInfected
-        position' = move position direction'
-
-    C.put (position', direction')
-
-    if isInfected
-        then return $ deleteSet position infected
-        else do
-            C.tell 1
-            return $ insertSet position infected
+burst infected = turn *> newInfected <* move
   where
-    right U = R
-    right R = D
-    right D = L
-    right L = U
+    newInfected = C.gets fst >>= \position ->
+        if position `member` infected
+            then return (deleteSet position infected)
+            else C.tell 1 >> return (insertSet position infected)
 
-    left U = L
-    left R = U
-    left D = R
-    left L = D
+    turn = C.modify $ \case
+        (position, U) -> (position, bool L R (position `member` infected))
+        (position, R) -> (position, bool U D (position `member` infected))
+        (position, D) -> (position, bool R L (position `member` infected))
+        (position, L) -> (position, bool D U (position `member` infected))
 
-    move (x, y) U = (x    , y + 1)
-    move (x, y) D = (x    , y - 1)
-    move (x, y) L = (x - 1, y    )
-    move (x, y) R = (x + 1, y    )
+    move = C.modify $ \case
+        ((x, y), U) -> ((x    , y + 1), U)
+        ((x, y), D) -> ((x    , y - 1), D)
+        ((x, y), L) -> ((x - 1, y    ), L)
+        ((x, y), R) -> ((x + 1, y    ), R)
 
 parseInput :: LText -> Infected
 parseInput txt = setFromList . map snd . filter (isHash . fst). zip nodes $ idx
