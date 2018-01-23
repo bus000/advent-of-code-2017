@@ -12,7 +12,10 @@ main = do
 
     case input of
         Left err -> Sys.die $ show err
-        Right particles -> print $ head . L.sortOn fst $ zip particles [0..]
+        Right particles -> print $ smallestInd particles
+
+smallestInd :: Ord a => [a] -> Int
+smallestInd xs = snd . head . L.sortOn fst $ zip xs [0..]
 
 type Position = V.Vector Int
 type Velocity = V.Vector Int

@@ -3,9 +3,9 @@
 module Main (main) where
 
 import ClassyPrelude
+import qualified Control.Monad as C
 import qualified Data.Array.Repa as R
 import Data.Array.Repa ((:.)(..))
-import qualified Data.Array.Repa.Algorithms.Matrix as R
 import qualified Data.Array.Repa.Repr.Unboxed as R
 import qualified Data.Bool as B
 import qualified Data.List as L
@@ -49,7 +49,7 @@ split :: R.Array R.D R.DIM2 e
 split arr = L.chunksOf sideLen $
     map (\start -> R.extract start extractSize arr) starts
   where
-    ((R.Z :. xSize) :. ySize) = R.extent arr
+    ((R.Z :. xSize) :. _) = R.extent arr
 
     splitSize = case xSize `mod` 2 of
         0 -> 2
@@ -121,9 +121,9 @@ rotate arr = if xSize /= ySize
         (\(R.Z :. ix :. iy) -> arr R.! (R.Z :. xSize - iy - 1 :. ix))
 
 flipVertical :: R.Source r e => R.Array r R.DIM2 e -> R.Array R.D R.DIM2 e
-flipVertical arr = R.traverse arr id flip
+flipVertical arr = R.traverse arr id flipVert
   where
-    flip f ((R.Z :. x) :. y) = f (R.ix2 (xSize - x - 1) y)
+    flipVert f ((R.Z :. x) :. y) = f (R.ix2 (xSize - x - 1) y)
     ((R.Z :. xSize) :. _) = R.extent arr
 
 {- | Parse list of rules from the input. -}
@@ -133,11 +133,11 @@ parseInput = P.parse (ruleP `P.endBy` P.char '\n' <* P.eof) ""
 ruleP :: P.Parsec LText () (Rule Bool)
 ruleP = do
     before <- concat <$> P.many value `P.sepBy` P.char '/'
-    P.string " => "
+    C.void $ P.string " => "
     after <- concat <$> P.many value `P.sepBy` P.char '/'
 
-    let blen = round . sqrt . fromIntegral $ length before
-        alen = round . sqrt . fromIntegral $ length after
+    let blen = round . sqrt . (fromIntegral :: Int -> Double) $ length before
+        alen = round . sqrt . (fromIntegral :: Int -> Double) $ length after
 
         beforeMatrix = R.fromListUnboxed (R.Z :. blen :. blen) before
         afterMatrix = R.fromListUnboxed (R.Z :. alen :. alen) after

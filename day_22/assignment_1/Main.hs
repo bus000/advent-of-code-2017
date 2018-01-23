@@ -6,10 +6,8 @@ import ClassyPrelude
 import qualified Control.Monad as C
 import qualified Control.Monad.RWS as C
 import qualified Data.Char as Char
-import qualified Data.Set as Set
 import qualified Data.Word as Word
 import Prelude ()
-import qualified System.Exit as S
 
 type Position = (Integer, Integer)
 type Infected = Set Position
@@ -56,6 +54,6 @@ parseInput :: LText -> Infected
 parseInput txt = setFromList . map snd . filter (isHash . fst). zip nodes $ idx
   where
     nodes = filter (not . Char.isSpace) . toList $ txt
-    size = (flip div) 2 . fromIntegral . length . lines $ txt
+    size = flip div 2 . fromIntegral . length . lines $ txt
     idx = [(y, x) | x <- [size,size-1..(-size)], y <- [-size..size]]
     isHash x = x == '#'

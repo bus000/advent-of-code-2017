@@ -36,7 +36,7 @@ move = do
         Continue -> forward >> (+ 1) <$> move
         ReportContinue c -> RWS.tell [c] >> forward >> (+ 1) <$> move
   where
-    nextAction tubeMap pos dir False = case tubeMap A.! pos of
+    nextAction tubeMap pos _ False = case tubeMap A.! pos of
         c | c == '|' || c == '-' -> Continue
         c | Char.isAlpha c -> ReportContinue c
         c | c == '+' -> Turn
@@ -51,6 +51,8 @@ move = do
             c | c == '-' -> Continue
             c | Char.isAlpha c -> ReportContinue c
             _ -> Abort
+
+    nextAction _ _ _ _ = Abort
 
 turn :: Tube Int
 turn = do

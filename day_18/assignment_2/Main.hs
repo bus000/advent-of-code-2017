@@ -44,8 +44,8 @@ interpret program = do
         initialState1 = InterpreterState env1 0 readC1 sendC1 chan1 chan2
         initialState2 = InterpreterState env2 0 readC2 sendC2 chan2 chan1
 
-    Conc.forkIO $ S.evalStateT interpret' initialState1
-    Conc.forkIO $ S.evalStateT interpret' initialState2
+    C.void $ Conc.forkIO $ S.evalStateT interpret' initialState1
+    C.void $ Conc.forkIO $ S.evalStateT interpret' initialState2
 
     nWritten <- STM.atomically $ do
         a <- STM.readTVar readC1
