@@ -3,6 +3,7 @@ module Main (main) where
 
 import ClassyPrelude
 import qualified Control.Monad.Except as C
+import qualified Control.Monad.Loops as C
 import qualified Control.Monad.RWS.Strict as C
 import qualified Data.Map as Map
 import qualified Data.Vector as V
@@ -25,7 +26,7 @@ main :: IO ()
 main = do
     program <- either (Sys.die . show) pure =<< parseInput <$> getContents
 
-    print $ getMuls program
+    either Sys.die print $ getMuls program
 
 type Environment a b = Map a b
 type ProgramCounter = Int
@@ -33,26 +34,17 @@ type InterpreterState = (ProgramCounter, Environment Char Integer)
 
 {- Interpreter. -}
 
-getMuls :: Program -> Either (String, Integer) Integer
+getMuls :: Program -> Either String Integer
 getMuls program =
     case C.evalRWS (C.runExceptT (interpret program)) () (0, initEnv) of
-        (Left err, asdf) -> Left (err, C.getSum asdf)
+        (Left err, _) -> Left err
         (Right _, muls) -> Right . C.getSum $ muls
   where
     initEnv = Map.fromList $ zip ['a'..'h'] (repeat 0)
 
 interpret :: (C.MonadRWS () (C.Sum Integer) InterpreterState m,
     C.MonadError String m) => Program -> m ()
-interpret program = forever $ do
-    (pc, env) <- C.get
-    traceShowM pc
-    when (pc > (V.length program - 1)) $ C.throwError "PC out of bounds"
-    when (pc < 0 ) $ C.throwError "PC out of bounds"
-    let stm = program V.! pc
-    traceShowM stm
-    C.put (pc+1, env)
-
-    execStm stm
+interpret program = C.whileJust_ getStm execStm
   where
     execStm (Set register value) = do
         (pc, env) <- C.get
@@ -96,6 +88,14 @@ interpret program = forever $ do
 
         maybe (C.throwError "Unknown Register") pure $ Map.lookup register env
     computeValue (Value int) = return int
+
+    getStm = do
+        (pc, env) <- C.get
+        if pc < 0 || pc > (V.length program - 1)
+        then return Nothing
+        else do
+            C.put (pc+1, env)
+            return $ Just (program V.! pc)
 
 {- Parser. -}
 
