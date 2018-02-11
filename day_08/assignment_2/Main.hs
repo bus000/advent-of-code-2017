@@ -1,9 +1,14 @@
+{- To be safe, the CPU also needs to know the highest value held in any register
+ - during this process so that it can decide how much memory to allocate to
+ - these operations. For example, in the above instructions, the highest value
+ - ever held was 10 (in register c after the third instruction was
+ - evaluated). -}
 module Main (main) where
 
 import qualified Data.Map as Map
+import qualified System.Exit as S
 import qualified Text.Parsec as P
 import qualified Text.Parsec.Number as P
-import qualified System.Exit as S
 
 type Var = String
 type Amount = Int

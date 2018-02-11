@@ -1,11 +1,20 @@
+{- Out of curiosity, the debugger would also like to know the size of the loop:
+ - starting from a state that has already been seen, how many block
+ - redistribution cycles must be performed before that same state is seen again?
+ -
+ - In the example above, 2 4 1 2 is seen again after four cycles, and so the
+ - answer in that example would be 4.
+ -
+ - How many cycles are in the infinite loop that arises from the configuration
+ - in your puzzle input? -}
 module Main (main) where
 
+import Control.Arrow ((&&&))
+import qualified Control.Monad.Loops as C
 import qualified Control.Monad.State as S
+import Data.List (group, sort)
 import qualified Data.Vector as V
 import Data.Vector ((!))
-import Control.Arrow ((&&&))
-import Data.List (group, sort)
-import qualified Control.Monad.Loops as C
 
 type Position = Int
 type Amount = Int

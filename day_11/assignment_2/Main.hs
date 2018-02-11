@@ -1,7 +1,9 @@
+{- How many steps away is the furthest he ever got from his starting
+ - position? -}
 module Main (main) where
 
-import qualified Data.List.Split as L
 import qualified Data.Char as Char
+import qualified Data.List.Split as L
 
 data Direction = N | NE | SE | S | SW | NW deriving (Show, Read)
 

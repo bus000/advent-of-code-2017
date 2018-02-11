@@ -1,3 +1,5 @@
+{- At this point, you should return to your advent calendar and try another
+ - puzzle. -}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleInstances #-}
 module Main (main) where
