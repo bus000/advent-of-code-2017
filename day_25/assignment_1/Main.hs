@@ -89,18 +89,12 @@
 module Main (main) where
 
 main :: IO ()
-main = do
-
-    let n = 12173597
-        Tape lefts current rights = myMachine n
-        leftsum = sum . map toInt . take n $ lefts
-        rightsum = sum . map toInt . take n $ rights
-
-    print $ leftsum + toInt current + rightsum
-
-toInt :: Bool -> Int
-toInt False = 0
-toInt True = 1
+main = print $ leftsum + toInt current + rightsum
+  where
+    n = 12173597
+    Tape lefts current rights = myMachine n
+    leftsum = sum . map toInt . take n $ lefts
+    rightsum = sum . map toInt . take n $ rights
 
 data Tape a = Tape [a] a [a]
 
@@ -109,9 +103,11 @@ constructTape x = Tape (repeat x) x (repeat x)
 
 right :: Tape a -> Tape a
 right (Tape lefts current (r:rights)) = Tape (current:lefts) r rights
+right (Tape lefts current []) = Tape lefts current []
 
 left :: Tape a -> Tape a
 left (Tape (l:lefts) current rights) = Tape lefts l (current:rights)
+left (Tape [] current rights) = Tape [] current rights
 
 tapeWrite :: a -> Tape a -> Tape a
 tapeWrite new (Tape lefts _ rights) = Tape lefts new rights
@@ -145,3 +141,7 @@ myMachine steps = snd $ foldr (const step) (initState, initTape) [1..steps]
     step (F, tape)
         | tapeRead tape = (A, right . tapeWrite True $ tape)
         | otherwise = (D, right . tapeWrite True $ tape)
+
+toInt :: Bool -> Int
+toInt False = 0
+toInt True = 1

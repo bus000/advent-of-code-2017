@@ -39,7 +39,7 @@ main = do
 paths :: Link -> V.Vector Link -> [[Link]]
 paths (Link s e) links = case legalLinks of
     [] -> [[Link s e]]
-    xs -> map (Link s e:) . concat $ (map (uncurry paths) legalLinks)
+    xs -> map (Link s e:) . concat $ map (uncurry paths) xs
   where
     legalLinks = filter legalNext . map flipLegal $ extractAll links
     legalNext (Link s' e', _) = s' == e || e' == e

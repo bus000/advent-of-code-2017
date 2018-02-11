@@ -19,4 +19,7 @@ module Main (main) where
 import qualified Data.Numbers.Primes as M
 
 main :: IO ()
-main = print . length . filter (not . M.isPrime) $ [109300, 109317..126300]
+main = print . length . filter (not . M.isPrime) $ xs
+  where
+    xs :: [Int]
+    xs = [109300, 109317..126300]
