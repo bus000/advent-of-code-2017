@@ -98,8 +98,8 @@ main = print $ leftsum + toInt current + rightsum
 
 data Tape a = Tape [a] a [a]
 
-constructTape :: a -> Tape a
-constructTape x = Tape (repeat x) x (repeat x)
+infiniteTape :: a -> Tape a
+infiniteTape x = Tape (repeat x) x (repeat x)
 
 right :: Tape a -> Tape a
 right (Tape lefts current (r:rights)) = Tape (current:lefts) r rights
@@ -120,7 +120,7 @@ data State = A | B | C | D | E | F
 myMachine :: Int -> Tape Bool
 myMachine steps = snd $ foldr (const step) (initState, initTape) [1..steps]
   where
-    initTape = constructTape False
+    initTape = infiniteTape False
     initState = A
 
     step (A, tape)
